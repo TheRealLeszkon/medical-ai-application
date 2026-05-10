@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.database import get_session
 from app.models import Doctor
@@ -10,6 +10,11 @@ router = APIRouter(
     prefix="/doctors",
     tags=["Doctors"]
 )
+
+@router.get("/")
+def list_doctors(session: Session = Depends(get_session)):
+    doctors = session.exec(select(Doctor)).all()
+    return doctors
 
 
 @router.get("/{doctor_id}")
