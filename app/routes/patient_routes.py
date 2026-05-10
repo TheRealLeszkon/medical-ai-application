@@ -12,10 +12,6 @@ router = APIRouter(
 )
 
 
-# -------------------------
-# GET PATIENT
-# -------------------------
-
 @router.get("/{patient_id}")
 def get_patient(
     patient_id: int,
@@ -32,9 +28,6 @@ def get_patient(
     return patient
 
 
-# -------------------------
-# REGISTER PATIENT
-# -------------------------
 
 @router.post("/")
 def register_patient(
@@ -50,9 +43,6 @@ def register_patient(
     return patient
 
 
-# -------------------------
-# UPDATE PATIENT
-# -------------------------
 
 @router.patch("/{patient_id}")
 def update_patient(

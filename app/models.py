@@ -67,12 +67,18 @@ class MedicalDocument(SQLModel, table=True):
 
     document_name: str
 
+    file_data: bytes
+    
+    mime_type: str
+
     patient_id: int = Field(
         foreign_key="patients.patient_id",
         index=True
     )
 
     vector_embedding_id: Optional[str] = None
+
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Appointment(SQLModel, table=True):

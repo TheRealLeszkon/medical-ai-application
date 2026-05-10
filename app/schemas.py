@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -100,3 +100,51 @@ class AIQuestion(BaseModel):
             }
         }
     }
+
+
+class MedicalDocumentRead(BaseModel):
+    document_id: int
+    document_name: str
+    mime_type: str
+    patient_id: int
+    vector_embedding_id: Optional[str] = None
+    uploaded_at: datetime
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "document_id": 1,
+                "document_name": "Blood_Test_Report.pdf",
+                "mime_type": "application/pdf",
+                "patient_id": 1,
+                "vector_embedding_id": "abc12345",
+                "uploaded_at": "2026-05-10T10:30:00"
+            }
+        }
+    }
+
+
+class AppointmentCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    booked_datetime: datetime
+    reason: Optional[str] = None
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "patient_id": 1,
+                "doctor_id": 2,
+                "booked_datetime": "2026-05-15T10:30:00",
+                "reason": "Routine Checkup"
+            }
+        }
+    }
+
+
+class AppointmentRead(BaseModel):
+    appointment_id: int
+    patient_id: int
+    doctor_id: int
+    booked_datetime: datetime
+    status: str
+    paid_fees: float
+    reason: Optional[str] = None
