@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault — AI Chat</title>
+    <meta name="description" content="Ask AI questions about your medical records using LangChain-powered intelligent agents">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-brand">
+            <div class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <span class="nav-title">MediVault</span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link" id="nav-upload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload
+            </a>
+            <a href="/chat.html" class="nav-link active" id="nav-chat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                AI Chat
+            </a>
+        </div>
+    </nav>
+
+    <!-- Chat Interface -->
+    <main class="chat-layout">
+        <!-- Sidebar -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="sidebar-header">
+                <h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Patient Context
+                </h3>
+            </div>
+            <div class="sidebar-content">
+                <div class="form-group">
+                    <label for="chat-patient-id">Patient ID</label>
+                    <div class="input-with-btn">
+                        <input type="number" id="chat-patient-id" placeholder="e.g., 1" min="1">
+                        <button class="btn btn-secondary btn-sm" id="set-patient-btn">Set</button>
+                    </div>
+                </div>
+                <div class="patient-info hidden" id="patient-info-panel">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div class="avatar" id="patient-avatar">?</div>
+                            <div>
+                                <h4 id="patient-name">—</h4>
+                                <p id="patient-dob">—</p>
+                            </div>
+                        </div>
+                        <div class="info-details">
+                            <div class="info-row">
+                                <span>Blood Group</span>
+                                <span id="patient-blood">—</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Phone</span>
+                                <span id="patient-phone">—</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Documents</span>
+                                <span id="patient-doc-count">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-tools">
+                    <h4>🔧 Agent Tools</h4>
+                    <div class="tool-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        search_medical_records
+                    </div>
+                    <div class="tool-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        get_patient_info
+                    </div>
+                    <div class="tool-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        list_patient_documents
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <div class="chat-main">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Welcome Message -->
+                <div class="message message-ai">
+                    <div class="message-avatar ai-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-name">MediVault AI</span>
+                        </div>
+                        <div class="message-body">
+                            <p>Hello! I'm your medical AI assistant powered by <strong>LangChain</strong>. I can help you understand and analyze medical records.</p>
+                            <p>To get started:</p>
+                            <ol>
+                                <li>Set a <strong>Patient ID</strong> in the sidebar</li>
+                                <li>Ask me anything about their medical documents</li>
+                            </ol>
+                            <p>I'll use my tools to search through records, retrieve patient info, and provide accurate answers. 🏥</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-area" id="chat-input-area">
+                <form id="chat-form" class="chat-form">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            id="chat-input"
+                            placeholder="Ask about medical records... (Set Patient ID first)"
+                            rows="1"
+                            disabled
+                        ></textarea>
+                        <button type="submit" class="btn-send" id="send-btn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="chat-disclaimer">AI responses are for informational purposes only. Always consult a healthcare professional.</p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = '';
+        let currentPatientId = null;
+
+        // ========================================
+        // Patient Setup
+        // ========================================
+        document.getElementById('set-patient-btn').addEventListener('click', setPatient);
+        document.getElementById('chat-patient-id').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') setPatient();
+        });
+
+        async function setPatient() {
+            const idInput = document.getElementById('chat-patient-id');
+            const patientId = parseInt(idInput.value);
+
+            if (!patientId || patientId < 1) {
+                showToast('Please enter a valid Patient ID', 'error');
+                return;
+            }
+
+            try {
+                // Fetch patient info
+                const patientRes = await fetch(`${API_BASE}/patients/${patientId}`);
+                if (!patientRes.ok) throw new Error('Patient not found');
+                const patient = await patientRes.json();
+
+                // Fetch document count
+                const docsRes = await fetch(`${API_BASE}/medical-records/patient/${patientId}`);
+                const docs = await docsRes.json();
+
+                // Update sidebar
+                currentPatientId = patientId;
+                document.getElementById('patient-name').textContent = patient.name;
+                document.getElementById('patient-dob').textContent = `DOB: ${patient.date_of_birth}`;
+                document.getElementById('patient-blood').textContent = patient.blood_group || '—';
+                document.getElementById('patient-phone').textContent = patient.phone_number;
+                document.getElementById('patient-doc-count').textContent = `${docs.length} documents`;
+                document.getElementById('patient-avatar').textContent = patient.name.charAt(0).toUpperCase();
+                document.getElementById('patient-info-panel').classList.remove('hidden');
+
+                // Enable chat
+                const chatInput = document.getElementById('chat-input');
+                const sendBtn = document.getElementById('send-btn');
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                chatInput.placeholder = `Ask about ${patient.name}'s medical records...`;
+                chatInput.focus();
+
+                addAIMessage(`Patient context set to **${patient.name}** (ID: ${patientId}) with ${docs.length} document(s). What would you like to know?`);
+                showToast(`Patient ${patient.name} loaded`, 'success');
+
+            } catch (err) {
+                showToast(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        // ========================================
+        // Chat Logic
+        // ========================================
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 150) + 'px';
+        });
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.requestSubmit();
+            }
+        });
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const question = chatInput.value.trim();
+            if (!question || !currentPatientId) return;
+
+            // Add user message
+            addUserMessage(question);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Add thinking indicator
+            const thinkingId = addThinkingIndicator();
+
+            try {
+                const response = await fetch(`${API_BASE}/ai/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_id: currentPatientId,
+                        question: question
+                    })
+                });
+
+                removeThinkingIndicator(thinkingId);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to get AI response');
+                }
+
+                const data = await response.json();
+                addAIMessage(data.answer);
+
+            } catch (err) {
+                removeThinkingIndicator(thinkingId);
+                addAIMessage(`⚠️ Error: ${err.message}. Please try again.`);
+            }
+        });
+
+        function addUserMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'message message-user';
+            div.innerHTML = `
+                <div class="message-content">
+                    <div class="message-body">${escapeHtml(text)}</div>
+                </div>
+                <div class="message-avatar user-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+        }
+
+        function addAIMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'message message-ai';
+            div.innerHTML = `
+                <div class="message-avatar ai-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-name">MediVault AI</span>
+                    </div>
+                    <div class="message-body">${formatMarkdown(text)}</div>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+        }
+
+        let thinkingCounter = 0;
+        function addThinkingIndicator() {
+            const id = 'thinking-' + (++thinkingCounter);
+            const div = document.createElement('div');
+            div.className = 'message message-ai';
+            div.id = id;
+            div.innerHTML = `
+                <div class="message-avatar ai-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div class="message-content">
+                    <div class="message-body thinking">
+                        <div class="thinking-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span class="thinking-text">Searching records & analyzing...</span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+            return id;
+        }
+
+        function removeThinkingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatMarkdown(text) {
+            // Simple markdown formatting
+            let html = escapeHtml(text);
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italic
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Code blocks
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // Line breaks
+            html = html.replace(/\n/g, '<br>');
+            // Lists
+            html = html.replace(/^- (.*?)(<br>|$)/gm, '<li>$1</li>');
+            return html;
+        }
+
+        // ========================================
+        // Toast
+        // ========================================
+        function showToast(message, type = 'info') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${type === 'success'
+                        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                        : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+                    }
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+</body>
+</html>

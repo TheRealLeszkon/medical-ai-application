@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault — Upload Medical Records</title>
+    <meta name="description" content="Upload and manage medical records with AI-powered document analysis">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-brand">
+            <div class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <span class="nav-title">MediVault</span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link active" id="nav-upload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload
+            </a>
+            <a href="/chat.html" class="nav-link" id="nav-chat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                AI Chat
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <h1 class="hero-title">Upload Medical Records</h1>
+        <p class="hero-subtitle">Securely upload PDFs and images. Our AI extracts text, creates smart embeddings, and makes your documents searchable.</p>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Upload Card -->
+        <div class="card upload-card" id="upload-section">
+            <div class="card-header">
+                <h2>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    Upload Document
+                </h2>
+            </div>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="patient-id-input">Patient ID</label>
+                    <input type="number" id="patient-id-input" name="patient_id" placeholder="Enter patient ID (e.g., 1)" required min="1">
+                </div>
+
+                <div class="dropzone" id="dropzone">
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="dropzone-text">Drag & drop your file here</p>
+                        <p class="dropzone-subtext">or click to browse</p>
+                        <div class="dropzone-badges">
+                            <span class="badge">PDF</span>
+                            <span class="badge">PNG</span>
+                            <span class="badge">JPEG</span>
+                            <span class="badge">WebP</span>
+                        </div>
+                    </div>
+                    <input type="file" id="file-input" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" hidden>
+                </div>
+
+                <!-- Selected File Preview -->
+                <div class="file-preview hidden" id="file-preview">
+                    <div class="file-preview-info">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <div>
+                            <p class="file-name" id="file-name"></p>
+                            <p class="file-size" id="file-size"></p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove" id="remove-file" title="Remove file">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="upload-btn" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Upload & Process
+                </button>
+            </form>
+
+            <!-- Progress Bar -->
+            <div class="progress-container hidden" id="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text" id="progress-text">Uploading...</p>
+            </div>
+
+            <!-- Result -->
+            <div class="result hidden" id="upload-result"></div>
+        </div>
+
+        <!-- Patient Documents Section -->
+        <div class="card" id="documents-section">
+            <div class="card-header">
+                <h2>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Patient Documents
+                </h2>
+            </div>
+            <div class="search-bar">
+                <input type="number" id="search-patient-id" placeholder="Patient ID" min="1">
+                <button class="btn btn-secondary" id="load-docs-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Load Documents
+                </button>
+            </div>
+            <div class="documents-list" id="documents-list">
+                <div class="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <p>Enter a Patient ID and click "Load Documents" to view stored records</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        const API_BASE = '';
+
+        // ========================================
+        // Dropzone Logic
+        // ========================================
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const removeFile = document.getElementById('remove-file');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadForm = document.getElementById('upload-form');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            fileName.textContent = file.name;
+            fileSize.textContent = formatBytes(file.size);
+            filePreview.classList.remove('hidden');
+            dropzone.classList.add('has-file');
+            uploadBtn.disabled = false;
+        }
+
+        removeFile.addEventListener('click', () => {
+            fileInput.value = '';
+            filePreview.classList.add('hidden');
+            dropzone.classList.remove('has-file');
+            uploadBtn.disabled = true;
+        });
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // ========================================
+        // Upload Form Submission
+        // ========================================
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const patientId = document.getElementById('patient-id-input').value;
+            const file = fileInput.files[0];
+
+            if (!patientId || !file) {
+                showToast('Please enter a Patient ID and select a file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('patient_id', patientId);
+            formData.append('file', file);
+
+            const progressContainer = document.getElementById('progress-container');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const resultDiv = document.getElementById('upload-result');
+
+            progressContainer.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            uploadBtn.disabled = true;
+
+            // Animate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 85) progress = 85;
+                progressFill.style.width = progress + '%';
+            }, 300);
+
+            progressText.textContent = 'Uploading & extracting text...';
+
+            try {
+                const response = await fetch(`${API_BASE}/medical-records/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Upload failed');
+                }
+
+                const data = await response.json();
+                progressText.textContent = 'Processing complete!';
+
+                resultDiv.innerHTML = `
+                    <div class="result-success">
+                        <div class="result-header">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <h3>Document Processed Successfully</h3>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-item">
+                                <span class="result-label">Document ID</span>
+                                <span class="result-value">${data.document_id}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">File Name</span>
+                                <span class="result-value">${data.document_name}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Patient ID</span>
+                                <span class="result-value">${data.patient_id}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">ChromaDB ID</span>
+                                <span class="result-value">${data.chroma_id}</span>
+                            </div>
+                        </div>
+                        <div class="result-text-preview">
+                            <h4>Extracted Text Preview</h4>
+                            <pre>${escapeHtml(data.text_preview)}</pre>
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+                showToast('Document uploaded and processed!', 'success');
+
+                // Reset form
+                fileInput.value = '';
+                filePreview.classList.add('hidden');
+                dropzone.classList.remove('has-file');
+
+            } catch (err) {
+                clearInterval(progressInterval);
+                progressFill.style.width = '0%';
+                progressText.textContent = 'Upload failed';
+                showToast(err.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                    uploadBtn.disabled = false;
+                }, 2000);
+            }
+        });
+
+        // ========================================
+        // Load Patient Documents
+        // ========================================
+        document.getElementById('load-docs-btn').addEventListener('click', loadDocuments);
+
+        async function loadDocuments() {
+            const patientId = document.getElementById('search-patient-id').value;
+            if (!patientId) {
+                showToast('Enter a Patient ID first', 'error');
+                return;
+            }
+
+            const listDiv = document.getElementById('documents-list');
+            listDiv.innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Loading...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/medical-records/patient/${patientId}`);
+                if (!response.ok) throw new Error('Failed to load documents');
+
+                const documents = await response.json();
+
+                if (documents.length === 0) {
+                    listDiv.innerHTML = `
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <p>No documents found for Patient ${patientId}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listDiv.innerHTML = documents.map(doc => `
+                    <div class="document-card">
+                        <div class="doc-icon ${doc.file_type.includes('pdf') ? 'pdf' : 'img'}">
+                            ${doc.file_type.includes('pdf')
+                                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+                                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+                            }
+                        </div>
+                        <div class="doc-info">
+                            <h4>${escapeHtml(doc.document_name)}</h4>
+                            <div class="doc-meta">
+                                <span class="badge ${doc.file_type.includes('pdf') ? 'badge-pdf' : 'badge-img'}">
+                                    ${doc.file_type.split('/')[1]?.toUpperCase() || 'FILE'}
+                                </span>
+                                <span>${doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : 'Unknown date'}</span>
+                                ${doc.has_embedding ? '<span class="badge badge-success">Embedded</span>' : ''}
+                            </div>
+                            ${doc.text_preview ? `<p class="doc-preview">${escapeHtml(doc.text_preview)}</p>` : ''}
+                        </div>
+                        <a href="${API_BASE}/medical-records/${doc.document_id}/download" class="btn btn-icon" title="Download">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </a>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                listDiv.innerHTML = `<div class="error-state">Error: ${err.message}</div>`;
+                showToast(err.message, 'error');
+            }
+        }
+
+        // ========================================
+        // Toast Notifications
+        // ========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${type === 'success'
+                        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                        : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+                    }
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

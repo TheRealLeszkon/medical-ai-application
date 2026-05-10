@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime, date
 
 from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, LargeBinary, Text
 
 
 class Patient(SQLModel, table=True):
@@ -72,7 +73,25 @@ class MedicalDocument(SQLModel, table=True):
         index=True
     )
 
+    file_type: str = Field(default="application/pdf")
+
+    # Store the file binary data in PostgreSQL
+    file_data: Optional[bytes] = Field(
+        default=None,
+        sa_column=Column(LargeBinary, nullable=True)
+    )
+
+    # Extracted text content from the document
+    extracted_text: Optional[str] = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True)
+    )
+
     vector_embedding_id: Optional[str] = None
+
+    uploaded_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow
+    )
 
 
 class Appointment(SQLModel, table=True):
