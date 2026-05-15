@@ -10,6 +10,7 @@ from app.routes.patient_routes import router as patient_router
 from app.routes.doctor_routes import router as doctor_router
 from app.routes.medical_record_routes import router as medical_router
 from app.routes.ai_routes import router as ai_router
+from app.routes.appointment_routes import router as appointment_router
 
 
 app = FastAPI(
@@ -38,6 +39,7 @@ app.include_router(patient_router)
 app.include_router(doctor_router)
 app.include_router(medical_router)
 app.include_router(ai_router)
+app.include_router(appointment_router)
 
 # Serve static files (frontend)
 static_dir = os.path.join(os.path.dirname(__file__), "static")

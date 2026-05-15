@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_USERNAME=${DATABASE_USERNAME:-tensai}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-1234}
+      - DATABASE_NAME=${DATABASE_NAME:-medical_db}
+      - DATABASE_HOST=db
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    volumes:
+      - ./chroma_data:/app/chroma_data
+      # Uncomment the following line for hot-reloading during development
+      # - ./app:/app/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME:-tensai}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-1234}
+      - POSTGRES_DB=${DATABASE_NAME:-medical_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-tensai} -d ${DATABASE_NAME:-medical_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

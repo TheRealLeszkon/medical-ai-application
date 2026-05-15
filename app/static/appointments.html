@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault — Appointments</title>
+    <meta name="description" content="Browse doctors, view schedules, and book medical appointments">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-brand">
+            <div class="nav-logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <span class="nav-title">MediVault</span>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-link" id="nav-upload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload
+            </a>
+            <a href="/chat.html" class="nav-link" id="nav-chat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                AI Chat
+            </a>
+            <a href="/appointments.html" class="nav-link active" id="nav-appointments">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Appointments
+            </a>
+            <div id="auth-status" class="nav-link" style="margin-left: auto; cursor: pointer;" onclick="logout()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span id="nav-user-name">Log Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <h1 class="hero-title">Book an Appointment</h1>
+        <p class="hero-subtitle">Browse our network of specialists, view their availability, and book your consultation in seconds.</p>
+    </section>
+
+    <main class="container appt-container">
+
+        <!-- Filter Bar -->
+        <div class="card filter-card" id="filter-section">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="filter-speciality">Speciality</label>
+                    <select id="filter-speciality" class="select-input">
+                        <option value="">All Specialities</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-hospital">Hospital</label>
+                    <select id="filter-hospital" class="select-input">
+                        <option value="">All Hospitals</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" id="filter-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Search
+                </button>
+                <button class="btn btn-ghost" id="clear-filter-btn">Clear</button>
+            </div>
+        </div>
+
+        <!-- Doctors Grid -->
+        <div class="doctors-grid" id="doctors-grid">
+            <div class="loading-spinner"><div class="spinner"></div> Loading doctors...</div>
+        </div>
+
+        <!-- Booking Modal -->
+        <div class="modal-overlay hidden" id="booking-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Book Appointment
+                    </h2>
+                    <button class="btn-remove" id="close-modal-btn" title="Close">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Doctor Summary -->
+                    <div class="modal-doctor-summary" id="modal-doctor-summary"></div>
+
+                    <form id="booking-form">
+                        <div class="form-group hidden" style="display:none;">
+                            <label for="booking-patient-id">Patient ID</label>
+                            <input type="number" id="booking-patient-id" required min="1">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="booking-date">Preferred Date</label>
+                                <input type="date" id="booking-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-time">Preferred Time</label>
+                                <select id="booking-time" class="select-input" required>
+                                    <option value="">Select time</option>
+                                    <option value="8:00 AM">8:00 AM</option>
+                                    <option value="8:30 AM">8:30 AM</option>
+                                    <option value="9:00 AM">9:00 AM</option>
+                                    <option value="9:30 AM">9:30 AM</option>
+                                    <option value="10:00 AM">10:00 AM</option>
+                                    <option value="10:30 AM">10:30 AM</option>
+                                    <option value="11:00 AM">11:00 AM</option>
+                                    <option value="11:30 AM">11:30 AM</option>
+                                    <option value="12:00 PM">12:00 PM</option>
+                                    <option value="12:30 PM">12:30 PM</option>
+                                    <option value="1:00 PM">1:00 PM</option>
+                                    <option value="1:30 PM">1:30 PM</option>
+                                    <option value="2:00 PM">2:00 PM</option>
+                                    <option value="2:30 PM">2:30 PM</option>
+                                    <option value="3:00 PM">3:00 PM</option>
+                                    <option value="3:30 PM">3:30 PM</option>
+                                    <option value="4:00 PM">4:00 PM</option>
+                                    <option value="4:30 PM">4:30 PM</option>
+                                    <option value="5:00 PM">5:00 PM</option>
+                                    <option value="5:30 PM">5:30 PM</option>
+                                    <option value="6:00 PM">6:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="booking-reason">Reason for Visit</label>
+                            <textarea id="booking-reason" rows="2" placeholder="Brief description of your concern"></textarea>
+                        </div>
+                        <div class="availability-note hidden" id="availability-note"></div>
+                        <button type="submit" class="btn btn-primary" id="confirm-booking-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Confirm Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal-overlay hidden" id="confirmation-modal">
+            <div class="modal-card confirmation-modal-card">
+                <div class="confirmation-content" id="confirmation-content"></div>
+                <div class="confirmation-actions">
+                    <a href="/chat.html" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Go to Chat
+                    </a>
+                    <button class="btn btn-primary" onclick="closeConfirmation()" style="width: auto;">Done</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        const API_BASE = '';
+        let allDoctors = [];
+        let selectedDoctor = null;
+
+        // ========================================
+        // Load doctors on page load
+        // ========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedPatientId = sessionStorage.getItem('currentPatientId');
+            const savedPatientName = sessionStorage.getItem('currentPatientName');
+            
+            if (!savedPatientId) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            document.getElementById('nav-user-name').textContent = `Log Out (${savedPatientName})`;
+
+            loadDoctors();
+            loadFilters();
+
+            // Set min date for booking to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateInput = document.getElementById('booking-date');
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        async function loadDoctors(speciality = '', hospital = '') {
+            const grid = document.getElementById('doctors-grid');
+            grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Loading doctors...</div>';
+
+            try {
+                let url = `${API_BASE}/appointments/doctors`;
+                const params = new URLSearchParams();
+                if (speciality) params.append('speciality', speciality);
+                if (hospital) params.append('hospital', hospital);
+                if (params.toString()) url += '?' + params.toString();
+
+                const res = await fetch(url);
+                const data = await res.json();
+                allDoctors = data.doctors;
+                renderDoctors(allDoctors);
+            } catch (err) {
+                grid.innerHTML = `<div class="error-state">Failed to load doctors: ${err.message}</div>`;
+            }
+        }
+
+        async function loadFilters() {
+            try {
+                // Load hospitals for filter
+                const hospRes = await fetch(`${API_BASE}/appointments/hospitals`);
+                const hospData = await hospRes.json();
+                const hospitalSelect = document.getElementById('filter-hospital');
+                hospData.hospitals.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h.name;
+                    opt.textContent = h.name;
+                    hospitalSelect.appendChild(opt);
+                });
+
+                // Load specialities from doctors
+                const docRes = await fetch(`${API_BASE}/appointments/doctors`);
+                const docData = await docRes.json();
+                const specs = [...new Set(docData.doctors.map(d => d.speciality))].sort();
+                const specSelect = document.getElementById('filter-speciality');
+                specs.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    specSelect.appendChild(opt);
+                });
+            } catch (err) {
+                console.error('Failed to load filters:', err);
+            }
+        }
+
+        function renderDoctors(doctors) {
+            const grid = document.getElementById('doctors-grid');
+
+            if (!doctors.length) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <p>No doctors found matching your criteria</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = doctors.map(doc => `
+                <div class="doctor-card" id="doctor-card-${doc.doctor_id}">
+                    <div class="doctor-card-top">
+                        <div class="doctor-avatar-lg">${doc.name.split(' ').pop().charAt(0)}</div>
+                        <div class="doctor-rating">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            ${doc.rating}
+                        </div>
+                    </div>
+                    <div class="doctor-card-body">
+                        <h3 class="doctor-name">${doc.name}</h3>
+                        <span class="doctor-speciality-badge">${doc.speciality}</span>
+                        <div class="doctor-details">
+                            <div class="doctor-detail-row">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                <span>${doc.hospital}</span>
+                            </div>
+                            <div class="doctor-detail-row">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                </svg>
+                                <span>${doc.experience_years} years experience</span>
+                            </div>
+                            <div class="doctor-detail-row">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                                <span>₹${doc.consultation_fee}</span>
+                            </div>
+                            <div class="doctor-detail-row">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <span>${doc.languages}</span>
+                            </div>
+                        </div>
+                        <div class="doctor-availability">
+                            <span class="avail-label">Available:</span>
+                            <div class="avail-days">
+                                ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => {
+                                    const full = {'Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday','Sun':'Sunday'}[d];
+                                    const isAvail = doc.availability[full];
+                                    return `<span class="day-chip ${isAvail ? 'day-available' : ''}" title="${isAvail || 'Not available'}">${d}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="doctor-card-footer">
+                        <button class="btn btn-primary doctor-book-btn" onclick="openBooking(${doc.doctor_id})">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Book Appointment
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========================================
+        // Filter Logic
+        // ========================================
+        document.getElementById('filter-btn').addEventListener('click', () => {
+            const spec = document.getElementById('filter-speciality').value;
+            const hosp = document.getElementById('filter-hospital').value;
+            loadDoctors(spec, hosp);
+        });
+
+        document.getElementById('clear-filter-btn').addEventListener('click', () => {
+            document.getElementById('filter-speciality').value = '';
+            document.getElementById('filter-hospital').value = '';
+            loadDoctors();
+        });
+
+        // ========================================
+        // Booking Modal
+        // ========================================
+        function openBooking(doctorId) {
+            selectedDoctor = allDoctors.find(d => d.doctor_id === doctorId);
+            if (!selectedDoctor) return;
+
+            const summary = document.getElementById('modal-doctor-summary');
+            summary.innerHTML = `
+                <div class="modal-doctor-info">
+                    <div class="doctor-avatar-lg modal-avatar">${selectedDoctor.name.split(' ').pop().charAt(0)}</div>
+                    <div>
+                        <h3>${selectedDoctor.name}</h3>
+                        <span class="doctor-speciality-badge">${selectedDoctor.speciality}</span>
+                        <p class="modal-hospital">${selectedDoctor.hospital}</p>
+                        <p class="modal-fee">Consultation Fee: <strong>₹${selectedDoctor.consultation_fee}</strong></p>
+                    </div>
+                </div>
+                <div class="modal-availability">
+                    <h4>Availability Schedule</h4>
+                    <div class="availability-grid">
+                        ${Object.entries(selectedDoctor.availability).map(([day, hours]) => `
+                            <div class="avail-slot">
+                                <span class="avail-day">${day}</span>
+                                <span class="avail-hours">${hours}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            // Validate date changes
+            document.getElementById('booking-date').addEventListener('change', validateDate);
+
+            // Auto-fill Patient ID if logged in
+            const savedPatientId = sessionStorage.getItem('currentPatientId');
+            if (savedPatientId) {
+                document.getElementById('booking-patient-id').value = savedPatientId;
+            }
+
+            document.getElementById('booking-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function validateDate() {
+            const dateVal = document.getElementById('booking-date').value;
+            const note = document.getElementById('availability-note');
+            if (!dateVal || !selectedDoctor) {
+                note.classList.add('hidden');
+                return;
+            }
+
+            const dateObj = new Date(dateVal + 'T00:00:00');
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+            
+            if (selectedDoctor.availability[dayName]) {
+                note.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    ${selectedDoctor.name} is available on ${dayName}: <strong>${selectedDoctor.availability[dayName]}</strong>
+                `;
+                note.className = 'availability-note note-success';
+            } else {
+                const availDays = Object.keys(selectedDoctor.availability).join(', ');
+                note.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Not available on ${dayName}. Available: <strong>${availDays}</strong>
+                `;
+                note.className = 'availability-note note-error';
+            }
+        }
+
+        document.getElementById('close-modal-btn').addEventListener('click', closeBooking);
+        document.getElementById('booking-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'booking-modal') closeBooking();
+        });
+
+        function closeBooking() {
+            document.getElementById('booking-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            document.getElementById('booking-form').reset();
+            document.getElementById('availability-note').classList.add('hidden');
+        }
+
+        // ========================================
+        // Submit Booking
+        // ========================================
+        document.getElementById('booking-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedDoctor) return;
+
+            const patientId = parseInt(document.getElementById('booking-patient-id').value);
+            const date = document.getElementById('booking-date').value;
+            const time = document.getElementById('booking-time').value;
+            const reason = document.getElementById('booking-reason').value;
+
+            if (!patientId || !date || !time) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('confirm-booking-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div> Booking...';
+
+            try {
+                const res = await fetch(`${API_BASE}/appointments/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_id: patientId,
+                        doctor_id: selectedDoctor.doctor_id,
+                        preferred_date: date,
+                        preferred_time: time,
+                        reason: reason || null,
+                    })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.detail || 'Booking failed');
+                }
+
+                const appointment = await res.json();
+                closeBooking();
+                showConfirmation(appointment);
+                showToast('Appointment booked successfully!', 'success');
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    Confirm Booking`;
+            }
+        });
+
+        function showConfirmation(appt) {
+            const content = document.getElementById('confirmation-content');
+            content.innerHTML = `
+                <div class="confirm-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h2>Appointment Confirmed!</h2>
+                <p class="confirm-id">Appointment #${appt.appointment_id}</p>
+                <div class="confirm-details">
+                    <div class="confirm-row">
+                        <span class="confirm-label">👨‍⚕️ Doctor</span>
+                        <span class="confirm-value">${appt.doctor_name} (${appt.speciality})</span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">🏥 Hospital</span>
+                        <span class="confirm-value">${appt.hospital}</span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">📍 Address</span>
+                        <span class="confirm-value">${appt.hospital_address}</span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">📅 Date</span>
+                        <span class="confirm-value">${appt.date} (${appt.day})</span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">🕐 Time</span>
+                        <span class="confirm-value">${appt.time}</span>
+                    </div>
+                    <div class="confirm-row">
+                        <span class="confirm-label">💰 Fee</span>
+                        <span class="confirm-value">₹${appt.consultation_fee}</span>
+                    </div>
+                    ${appt.reason ? `
+                    <div class="confirm-row">
+                        <span class="confirm-label">📝 Reason</span>
+                        <span class="confirm-value">${escapeHtml(appt.reason)}</span>
+                    </div>` : ''}
+                </div>
+                <p class="confirm-note">Please arrive 15 minutes early with your ID and medical records.</p>
+            `;
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmation-modal').classList.add('hidden');
+        }
+
+        document.getElementById('confirmation-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'confirmation-modal') closeConfirmation();
+        });
+
+        // ========================================
+        // Toast
+        // ========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${type === 'success'
+                        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                        : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+                    }
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
